@@ -7,9 +7,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 import rocketseat.com.passin.dto.attendee.AttendeeIdDTO;
 import rocketseat.com.passin.dto.attendee.AttendeeRequestDTO;
 import rocketseat.com.passin.dto.attendee.AttendeesListResponseDTO;
+import rocketseat.com.passin.dto.event.EventDetailDTO;
 import rocketseat.com.passin.dto.event.EventIdDTO;
+import rocketseat.com.passin.dto.event.EventListAttendees;
 import rocketseat.com.passin.dto.event.EventRequestDTO;
-import rocketseat.com.passin.dto.event.EventResponseDTO;
 import rocketseat.com.passin.services.AttendeeService;
 import rocketseat.com.passin.services.EventService;
 
@@ -22,15 +23,15 @@ public class EventController {
     private final AttendeeService attendeeService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<EventResponseDTO> getEvent(@PathVariable String id){
-        EventResponseDTO event = this.eventService.getEventDetail(id);
+    public ResponseEntity<EventDetailDTO> getEvent(@PathVariable String id){
+        EventDetailDTO event = this.eventService.getEventDetail(id);
         return ResponseEntity.ok(event);
     }
 
     @GetMapping("/attendees/{id}")
-    public ResponseEntity<AttendeesListResponseDTO> getEventAttendees(@PathVariable String id){
-        AttendeesListResponseDTO attendeesListResponse = this.attendeeService.getEventsAttendee(id);
-        return ResponseEntity.ok(attendeesListResponse);
+    public ResponseEntity<EventListAttendees> getEventAttendees(@PathVariable String id){
+        EventListAttendees eventListAttendees = this.eventService.getEventsAttendee(id);
+        return ResponseEntity.ok(eventListAttendees);
     }
 
     @PostMapping

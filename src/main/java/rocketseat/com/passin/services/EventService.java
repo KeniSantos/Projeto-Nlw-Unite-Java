@@ -7,9 +7,7 @@ import rocketseat.com.passin.domain.events.exceptions.EventFullException;
 import rocketseat.com.passin.domain.events.exceptions.EventNotFoundException;
 import rocketseat.com.passin.dto.attendee.AttendeeIdDTO;
 import rocketseat.com.passin.dto.attendee.AttendeeRequestDTO;
-import rocketseat.com.passin.dto.event.EventIdDTO;
-import rocketseat.com.passin.dto.event.EventRequestDTO;
-import rocketseat.com.passin.dto.event.EventResponseDTO;
+import rocketseat.com.passin.dto.event.*;
 import rocketseat.com.passin.repositories.EventRepository;
 import rocketseat.com.passin.domain.events.Event;
 
@@ -24,10 +22,14 @@ public class EventService {
     private final EventRepository eventRepository;
     private final AttendeeService attendeeService;
 
-    public EventResponseDTO getEventDetail(String eventId) {
-        Event event = this.getEventById(eventId);
-        List<Attendee> attendeeList = this.attendeeService.getAllAttendeesFromEvent(eventId);
-        return new EventResponseDTO(event, attendeeList.size());
+    public EventListAttendees getEventsAttendee(String eventId){
+        List<EventAttendees> eventAttendees = this.eventRepository.findAttendeesFromEvent(eventId).orElseThrow(() -> new EventNotFoundException("Event not found with ID: " + eventId));
+        return new EventListAttendees(eventAttendees);
+    }
+
+    public EventDetailDTO getEventDetail(String eventId) {
+        EventResponseDTO event =  this.eventRepository.getEventDetails(eventId).orElseThrow(() -> new EventNotFoundException("Event not found with ID: " + eventId));
+        return new EventDetailDTO(event.getId(), event.getTitle(), event.getDetails(), event.getSlug(), event.getMaximumAttendees(), event.getAttendeesAmount());
     }
 
     public EventIdDTO createEvent(EventRequestDTO eventDto){
@@ -50,9 +52,11 @@ public class EventService {
     public AttendeeIdDTO registerAttendeeOnEvent(String eventId, AttendeeRequestDTO attendeeRequestDTO) {
         this.attendeeService.verifyAttendeeSubscription(attendeeRequestDTO.email(), eventId);
         Event event = this.getEventById(eventId);
-        List<Attendee> attendeeList = this.attendeeService.getAllAttendeesFromEvent(eventId);
+        EventCountAttendees attendeeList = this.eventRepository.findAttendeesAmountFromEvent(eventId);
 
-        if(event.getMaximumAttendees() <= attendeeList.size()) throw new EventFullException("Event is full");
+        if(event.getMaximumAttendees() <= attendeeList.getAttendeesAmount()) throw new EventFullException("Event is full");
+
+        System.out.println(attendeeList.getAttendeesAmount());
 
         Attendee newAttendee = new Attendee();
         newAttendee.setName(attendeeRequestDTO.name());
